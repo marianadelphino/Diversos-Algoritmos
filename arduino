@@ -1,0 +1,230 @@
+int pino_analogico = A0;
+int valor_A = 0;
+
+#include <NewPing.h>
+
+#define TRIGGER_PIN 42
+#define ECHO_PIN 44
+#define MAX_DISTANCE 100
+
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+
+// Motor A da esquerda
+int saidaVelocidadeA = 10;
+int saidaSentidoA1 = 4;
+int saidaSentidoA2 = 5;
+
+// Motor B da direita
+int saidaVelocidadeB = 11;
+int saidaSentidoB1 = 6;
+int saidaSentidoB2 = 7;
+
+#define SS1_LEFT_OUT 24
+#define SS2_LEFT_IN 26
+#define SS3_CENTER 28
+#define SS4_RIGHT_IN 30
+#define SS5_RIGHT_OUT 32
+//#define CLP_BUMP 34
+//#define NEAR A7
+
+byte LeftOut;
+byte LeftIn;
+byte Center;
+byte RightIn;
+byte RightOut;
+//byte  Bump;
+//int   Near;
+
+void setup()
+{
+
+  pinMode(pino_analogico, INPUT); 
+  
+    Serial.begin(115200);
+    pinMode(7, OUTPUT);
+
+    // Seguir Linha
+    pinMode(SS1_LEFT_OUT, INPUT);
+    pinMode(SS2_LEFT_IN, INPUT);
+    pinMode(SS3_CENTER, INPUT);
+    pinMode(SS4_RIGHT_IN, INPUT);
+    pinMode(SS5_RIGHT_OUT, INPUT);
+
+    // Motor A da esquerda
+    pinMode(saidaVelocidadeA, OUTPUT);
+    pinMode(saidaSentidoA1, OUTPUT);
+    pinMode(saidaSentidoA2, OUTPUT);
+
+    // Motor B da direita
+    pinMode(saidaVelocidadeB, OUTPUT);
+    pinMode(saidaSentidoB1, OUTPUT);
+    pinMode(saidaSentidoB2, OUTPUT);
+    Serial.begin(9600);
+}
+
+void loop()
+{
+pino_analogico = analogRead(A0);
+  valor_A = pino_analogico;
+  if(valor_A>140){
+    Serial.println("Silêncio Por Favor");
+    delay(200);
+  } 
+  
+    delay(50);
+    int distance = sonar.ping_cm();
+    Serial.print("Ping:");
+    Serial.print(distance);
+    Serial.println("cm");
+
+    if (distance < 10)
+
+    {
+        digitalWrite(7, HIGH);
+        delay(distance * 10);
+        digitalWrite(7, LOW);
+        delay(distance * 10);
+
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, HIGH);
+        digitalWrite(saidaSentidoB1, HIGH);
+        digitalWrite(saidaSentidoB2, HIGH);
+    }
+
+    getSensorData();
+    showSensorData();
+    //  delay(2000);
+}
+
+void getSensorData()
+{
+    LeftOut = digitalRead(SS1_LEFT_OUT);
+    LeftIn = digitalRead(SS2_LEFT_IN);
+    Center = digitalRead(SS3_CENTER);
+    RightIn = digitalRead(SS4_RIGHT_IN);
+    RightOut = digitalRead(SS5_RIGHT_OUT);
+
+ 
+  Serial.println();
+
+  Serial.print("Left Out SS1 >>> ");
+  Serial.println(LeftOut);
+
+  Serial.print("Left In SS2 >>> ");
+  Serial.println(LeftIn);
+
+  Serial.print("Center SS3 >>> ");
+  Serial.println(Center);
+
+  Serial.print("Right In SS4 >>> ");
+  Serial.println(RightIn);
+
+  Serial.print("Right Out SS5 >>> ");
+  Serial.println(RightOut);
+}
+
+void showSensorData()
+{
+    if (LeftOut == 1 && LeftIn == 1 && Center == 0 && RightIn == 1 && RightOut == 1) {
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, LOW);
+        analogWrite(saidaVelocidadeA, 60);
+
+        digitalWrite(saidaSentidoB1, LOW);
+        digitalWrite(saidaSentidoB2, HIGH);
+        analogWrite(saidaVelocidadeB, 60);
+    }
+//    else if ((LeftOut == 0 || LeftIn == 0) && Center == 1 && RightIn == 1 && RightOut == 1) {
+//        digitalWrite(saidaSentidoB1, LOW);
+//        digitalWrite(saidaSentidoB2, HIGH);
+//        analogWrite(saidaVelocidadeB, 60);
+//        analogWrite(saidaVelocidadeA, 40);
+//    }
+//    else if (LeftOut == 1 && LeftIn == 0 && Center == 0 && RightIn == 1 && RightOut == 1) {
+//        digitalWrite(saidaSentidoB1, LOW);
+//        digitalWrite(saidaSentidoB2, HIGH);
+//        analogWrite(saidaVelocidadeB, 60);
+//        analogWrite(saidaVelocidadeA, 40);
+//    }
+    else if (LeftOut == 1 && LeftIn == 0 && Center == 1 && RightIn == 1 && RightOut == 1) {
+        digitalWrite(saidaSentidoB1, LOW);
+        digitalWrite(saidaSentidoB2, HIGH);
+        analogWrite(saidaVelocidadeB, 60);
+
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, LOW);
+        analogWrite(saidaVelocidadeA, 40);
+    }
+    else if (LeftOut == 0 && LeftIn == 1 && Center == 1 && RightIn == 1 && RightOut == 1) {
+        digitalWrite(saidaSentidoB1, LOW);
+        digitalWrite(saidaSentidoB2, HIGH);
+        analogWrite(saidaVelocidadeB, 60);
+
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, LOW);
+        analogWrite(saidaVelocidadeA, 40);
+    }
+    else if (LeftOut == 0 && LeftIn == 0 && Center == 1 && RightIn == 1 && RightOut == 1) {
+        digitalWrite(saidaSentidoB1, LOW);
+        digitalWrite(saidaSentidoB2, HIGH);
+        analogWrite(saidaVelocidadeB, 60);
+
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, LOW);
+        analogWrite(saidaVelocidadeA, 40);
+    }
+//    else if (LeftOut == 1 && LeftIn == 1 && Center == 1 && (RightIn == 0 || RightOut == 0)) {
+//        digitalWrite(saidaSentidoA1, HIGH);
+//        digitalWrite(saidaSentidoA2, LOW);
+//        analogWrite(saidaVelocidadeB, 40);
+//        analogWrite(saidaVelocidadeA, 60);
+//    }
+//    else if (LeftOut == 1 && LeftIn == 1 && Center == 0 && RightIn == 0 && RightOut == 1) {
+//        digitalWrite(saidaSentidoA1, HIGH);
+//        digitalWrite(saidaSentidoA2, LOW);
+//        analogWrite(saidaVelocidadeB, 40);
+//        analogWrite(saidaVelocidadeA, 60);
+//    }
+    else if (LeftOut == 1 && LeftIn == 1 && Center == 1 && RightIn == 0 && RightOut == 1) {
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, LOW);
+        analogWrite(saidaVelocidadeB, 40);
+
+        digitalWrite(saidaSentidoB1, LOW);
+        digitalWrite(saidaSentidoB2, HIGH);
+        analogWrite(saidaVelocidadeA, 60);
+    }
+    else if (LeftOut == 1 && LeftIn == 1 && Center == 1 && RightIn == 1 && RightOut == 0) {
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, LOW);
+        analogWrite(saidaVelocidadeB, 40);
+
+        digitalWrite(saidaSentidoB1, LOW);
+        digitalWrite(saidaSentidoB2, HIGH);
+        analogWrite(saidaVelocidadeA, 60);
+    }
+    else if (LeftOut == 1 && LeftIn == 1 && Center == 1 && RightIn == 0 && RightOut == 0) {
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, LOW);
+        analogWrite(saidaVelocidadeB, 40);
+
+        digitalWrite(saidaSentidoB1, LOW);
+        digitalWrite(saidaSentidoB2, HIGH);
+        analogWrite(saidaVelocidadeA, 60);
+    }
+//    else if (LeftOut == 1 && LeftIn == 1 && Center == 1 && RightIn == 1 && RightOut == 1) {
+//        digitalWrite(saidaSentidoA1, HIGH);
+//        digitalWrite(saidaSentidoA2, LOW);
+//        analogWrite(saidaVelocidadeA, 30);
+//
+//        digitalWrite(saidaSentidoB1, LOW);
+//        digitalWrite(saidaSentidoB2, HIGH);
+//        analogWrite(saidaVelocidadeB, 30);
+//    }
+    else {
+        digitalWrite(saidaSentidoA1, HIGH);
+        digitalWrite(saidaSentidoA2, HIGH);
+        digitalWrite(saidaSentidoB1, HIGH);
+        digitalWrite(saidaSentidoB2, HIGH);
+    }
+}
